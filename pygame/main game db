@@ -1,0 +1,112 @@
+def sql_connect():
+        global cscore, score, user_text, lboard, time, lvlcomp
+
+        mtime = time // 60
+        name = user_text
+        conn = sqlite3.connect('player_data.db')
+        cursor = conn.cursor()
+
+        # Create tables if they don't already exist
+        cursor.execute('''CREATE TABLE IF NOT EXISTS players (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            score INTEGER,
+            coins INTEGER
+        )''')
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS playtime (
+            id INTEGER,
+            name TEXT,
+            time INTEGER,
+            FOREIGN KEY (id) REFERENCES players(id)
+        )''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS leveldat(
+            id INTEGER,
+            name TEXT,
+            lvlcompleted INTEGER,
+            FOREIGN KEY (id) REFERENCES players(id)
+            )''')
+
+      
+
+
+        # Initialize Pygame
+        pygame.init()
+
+        # Function to insert player data into the database
+        def insert_player_data(name, score, coins):
+                    cursor.execute("INSERT INTO players (name, score, coins) VALUES (?, ?, ?)", (name, score, coins))
+                    conn.commit()
+
+        # Function to retrieve player data from the database
+        def get_player_data():
+                    cursor.execute("SELECT * FROM players")
+                    return cursor.fetchall()
+
+        # Function to insert playtime data into the database
+        def insert_playtime(player_id, name, mtime):
+                    cursor.execute("INSERT INTO playtime (id, name, time) VALUES (?, ?, ?)", (player_id, name, mtime))
+                    conn.commit()
+
+        # Function to retrieve playtime data from the database
+        def get_playtime():
+                    cursor.execute("SELECT * FROM playtime")
+                    return cursor.fetchall()
+
+        def insert_leveldat(player_id, name, lvlcomp):
+                    cursor.execute("INSERT INTO leveldat (id,name,lvlcompleted) VALUES (?,?,?)", (player_id, name, lvlcomp))
+                    conn.commit()
+
+        def get_leveldat():
+                    cursor.execute("SELECT * FROM leveldat")
+                    return cursor.fetchall()
+
+
+        #function to insert data in feedback
+    
+
+        # Example usage
+        player_name = name
+        player_score = score
+        player_coins = cscore
+
+        # Check if player already exists
+        cursor.execute("SELECT id FROM players WHERE name = ?", (player_name,))
+        result = cursor.fetchone()
+
+        if result is None:
+                # Insert player data into the database
+                insert_player_data(player_name, player_score, player_coins)
+                player_id = cursor.lastrowid
+        else:
+                player_id = result[0]
+
+        # Insert playtime data into the database
+        insert_playtime(player_id, player_name, mtime)
+
+        # Insert leveldat data into the database
+        insert_leveldat(player_id, player_name, lvlcomp)
+
+        # Retrieve player data from the database
+        players = get_player_data()
+        for player in players:
+            pass
+
+        # Display player data
+        df = pd.read_sql_query("SELECT * from players ORDER BY score DESC", conn)
+        print(df.head())
+
+        lboard = True
+
+        # Retrieve and display playtime data
+        dfi = pd.read_sql_query("SELECT * FROM playtime ORDER BY time DESC", conn)
+        print(dfi.head())
+
+        # Retrieve and display level data
+        dfj = pd.read_sql_query("SELECT * FROM leveldat ORDER BY lvlcompleted DESC", conn)
+        print(dfj.head())
+
+        
+
+        # Close the connection to the database when done
+        conn.close()
