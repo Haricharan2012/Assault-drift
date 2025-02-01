@@ -15,8 +15,8 @@ Assault Drift is an action-packed arcade shooter game developed in Python using 
 
 Clone the repository:
 
-git clone https://github.com/your-username/assault-drift.git
-cd assault-drift
+    git clone https://github.com/your-username/assault-drift.git
+    cd assault-drift
 
 Install dependencies:
 Ensure you have Python and Pygame installed.
